@@ -124,10 +124,10 @@ const SideBar = () => {
                     </div>
                 </a>
                 
-                <div className="bottom-item">
+                {/* <div className="bottom-item">
                     <img src={assets.settings_icon} alt="Settings" />
                     {extended && <p>Settings</p>}
-                </div>
+                </div> */}
             </div>
         </div>
     )
