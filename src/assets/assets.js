@@ -11,6 +11,9 @@ import send_icon from './send_icon.png'
 import gemini_icon from './gemini_icon.png'
 import pfp_icon from './artificial-intelligence.png'
 import chatpfp_icon from './user-svgrepo-com.svg'
+import moon_icon from './moon_icon.png'
+import sun_icon from './sun_icon.png'
+import settings_icon from './setting_icon.png'
 
 export const assets = {
     chatpfp_icon,
@@ -25,5 +28,8 @@ export const assets = {
     message_icon,
     code_icon,
     send_icon,
-    gemini_icon
+    gemini_icon,
+    moon_icon,
+    sun_icon,
+    settings_icon
 }

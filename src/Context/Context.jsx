@@ -1,85 +1,141 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
 import run from "../config/Gemini";
 
 export const context = createContext();
 
-
-
-
 const ContextProvider = (props) => {
+    const [input, setInput] = useState("");
+    const [recentPrompt, setRecentPrompt] = useState("");
+    const [previousPrompt, setPreviousPrompt] = useState([]); 
+    const [showResult, setShowResult] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [ResultData, setResultData] = useState("");
+    const [chatHistory, setChatHistory] = useState({});
+    const [currentChatId, setCurrentChatId] = useState(null);
 
-    const [input,setInput] = useState("");
-    const [recentPrompt,setRecentPrompt] = useState("");
-    const [previousPrompt,setPreviousPrompt] = useState([]); 
-    const [showResult,setShowResult] = useState(false);
-    const [loading,setLoading]= useState(false);
-    const [ResultData,setResultData]=useState("");
+    // Load chat history from localStorage on initial load
+    useEffect(() => {
+        const savedChats = localStorage.getItem('chatHistory');
+        if (savedChats) {
+            setChatHistory(JSON.parse(savedChats));
+        }
+    }, []);
 
-    const delayPara = (index,nextWord)  => {
-        setTimeout(function (){
-            setResultData(prev=>prev+nextWord);
-        }, 75*index)
-    }
+    // Save chat history to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+    }, [chatHistory]);
 
-    const newchat = () => {
-        setLoading(false)
-        setShowResult(false)
-    }
+    const formatResponse = (text) => {
+        // Format code blocks
+        text = text.replace(/```([\s\S]*?)```/g, (match, code) => {
+            const [language, ...codeLines] = code.trim().split('\n');
+            return `<pre class="code-block"><code class="language-${language}">${codeLines.join('\n')}</code></pre>`;
+        });
+
+        // Format inline code
+        text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+        // Format bold text
+        text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+        // Format lists
+        text = text.replace(/^\s*[-*]\s+(.+)$/gm, '<li>$1</li>');
+        text = text.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+
+        // Format headers
+        text = text.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+        text = text.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+        text = text.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+
+        // Format links
+        text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+        return text;
+    };
+
+    const createNewChat = () => {
+        const chatId = Date.now().toString();
+        setChatHistory(prev => ({
+            ...prev,
+            [chatId]: []
+        }));
+        setCurrentChatId(chatId);
+        setShowResult(false);
+        setResultData("");
+        setInput("");
+        setRecentPrompt("");
+    };
+
+    const loadChat = (chatId) => {
+        setCurrentChatId(chatId);
+        if (chatHistory[chatId] && chatHistory[chatId].length > 0) {
+            setShowResult(true);
+            const lastMessage = chatHistory[chatId][chatHistory[chatId].length - 1];
+            setRecentPrompt(lastMessage.prompt);
+            setResultData(lastMessage.response);
+        }
+    };
+
+    const deleteChat = (chatId) => {
+        const newChatHistory = { ...chatHistory };
+        delete newChatHistory[chatId];
+        setChatHistory(newChatHistory);
+        if (currentChatId === chatId) {
+            setCurrentChatId(null);
+            setShowResult(false);
+            setResultData("");
+            setInput("");
+            setRecentPrompt("");
+        }
+    };
 
     const onSent = async(prompt) => {
+        setResultData("");
+        setLoading(true);
+        setShowResult(true);
 
-        setResultData("")
-
-        setLoading(true)
-
-        setShowResult(true)
-
-        let response;
-
-        if(prompt !== undefined)
-        {
-            response= await run(prompt)
-            setRecentPrompt(prompt)
-        }
-        else{
-            setPreviousPrompt(prev=>[...prev,input])
-            setRecentPrompt(input)
-            response=await run(input)
+        let userPrompt;
+        if(prompt !== undefined) {
+            userPrompt = prompt;
+            setRecentPrompt(prompt);
+        } else {
+            userPrompt = input;
+            setRecentPrompt(input);
         }
 
-
-        let responseArray=response.split("**");
-
-        let newResponse = "";
-
-        for(let i=0;i<responseArray.length;i++)
-        {
-            if(i==0 || i%2 !==1)
-            {
-                newResponse += responseArray[i];
-            }
-            else{
-                newResponse += "<b>" +responseArray[i]+"</b>";
-            }
+        // Create new chat if none exists
+        if (!currentChatId) {
+            createNewChat();
         }
 
-        let newResponse2 = newResponse.split("*").join("</br>")
+        try {
+            const response = await run(userPrompt);
+            const formattedResponse = formatResponse(response);
+            
+            // Save the chat exchange to history
+            setChatHistory(prev => ({
+                ...prev,
+                [currentChatId]: [
+                    ...(prev[currentChatId] || []),
+                    {
+                        prompt: userPrompt,
+                        response: formattedResponse,
+                        timestamp: new Date().toISOString()
+                    }
+                ]
+            }));
 
-
-        let newReponseArray = newResponse2.split(" ");
-
-        for(let i=0;i<newReponseArray.length;i++)
-        {
-            const nextWord = newReponseArray[i];
-            delayPara(i,nextWord+" ");
+            setResultData(formattedResponse);
+        } catch (error) {
+            console.error('Error getting response:', error);
+            setResultData("Sorry, there was an error processing your request.");
         }
 
-        setLoading(false)
+        setLoading(false);
+        setInput("");
+    };
 
-        setInput("")
-    }
-
-    
     const contextValue = {
         previousPrompt,
         setPreviousPrompt,
@@ -91,14 +147,18 @@ const ContextProvider = (props) => {
         ResultData,
         input,
         setInput,
-        newchat
-    }
+        createNewChat,
+        loadChat,
+        deleteChat,
+        chatHistory,
+        currentChatId
+    };
 
     return (
         <context.Provider value={contextValue}>
             {props.children}
         </context.Provider>
-    )
+    );
 }
 
-export default ContextProvider
+export default ContextProvider;
