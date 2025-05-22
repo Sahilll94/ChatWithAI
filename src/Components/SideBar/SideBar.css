@@ -10,14 +10,16 @@
     top: 0;
     height: 100vh;
     overflow-y: auto;
-    width: 280px;
+    width: 300px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
 }
 
 .SideBar.collapsed {
     width: 80px;
+    padding: 25px 10px;
 }
 
 .SideBar::-webkit-scrollbar {

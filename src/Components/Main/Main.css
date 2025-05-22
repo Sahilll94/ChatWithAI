@@ -4,6 +4,12 @@
     padding-bottom: 15vh;
     position: relative;
     background-color: var(--bg-main);
+    width: calc(100% - 80px);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.SideBar.expanded + .main {
+    width: calc(100% - 300px);
 }
 
 .main .nav {
@@ -11,7 +17,7 @@
     align-items: center;
     justify-content: space-between;
     font-size: 22px;
-    padding: 20px;
+    padding: 20px 40px;
     color: var(--text-secondary);
     background: var(--nav-bg);
     backdrop-filter: blur(10px);
@@ -32,8 +38,10 @@
 }
 
 .main-container {
-    max-width: 900px;
+    max-width: 1200px;
+    width: 100%;
     margin: auto;
+    padding: 0 40px;
 }
 
 .main .greet {
@@ -123,17 +131,22 @@
 .main-bottom {
     position: fixed;
     bottom: 0;
-    left: 0;
+    left: 80px;
     right: 0;
-    padding: 20px;
+    padding: 20px 40px;
     background: var(--nav-bg);
     backdrop-filter: blur(10px);
     box-shadow: none;
     z-index: 100;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.SideBar.expanded ~ .main .main-bottom {
+    left: 300px;
 }
 
 .search-box {
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -191,8 +204,8 @@
 }
 
 .result {
-    padding: 0px 5%;
-    max-height: 70vh;
+    padding: 0 40px;
+    max-height: calc(100vh - 180px);
     overflow-y: auto;
     scroll-behavior: smooth;
     padding-bottom: 100px;
@@ -456,54 +469,36 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .main .cards {
-        grid-template-columns: 1fr;
-        padding: 15px;
+    .main {
+        width: 100%;
     }
 
-    .main .card {
-        height: auto;
-        min-height: 150px;
+    .main .nav,
+    .main-container,
+    .result {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .main-bottom {
+        left: 0;
+        padding: 15px 20px;
     }
 
     .search-box {
         padding: 12px 20px;
     }
 
-    .search-box input {
-        font-size: 16px;
+    .SideBar.expanded ~ .main .main-bottom {
+        left: 0;
     }
 
-    .result {
-        padding: 0px 15px;
+    .main .cards {
+        grid-template-columns: 1fr;
     }
 
-    .result-data {
-        padding: 15px;
-    }
-
-    .main .greet {
-        font-size: 32px;
-        padding: 15px;
-    }
-
-    .main-bottom {
-        padding: 15px;
-    }
-    
-    .search-box {
-        padding: 10px 15px;
-    }
-    
-    .search-box input {
-        font-size: 16px;
-    }
-    
-    .main .nav {
-        padding: 15px;
-    }
-    
-    .main .greet {
-        margin: 30px 0;
+    .main .card {
+        height: auto;
+        min-height: 150px;
     }
 }
