@@ -96,7 +96,8 @@ The application will be available at `http://localhost:5173`
 
 ## Project Structure
 
-\`\`\`
+```
+
 ChatWithAI/
 ├── src/
 │   ├── Components/          # React components
@@ -107,7 +108,8 @@ ChatWithAI/
 │   └── assets/             # Images and icons
 ├── public/                 # Public assets
 └── package.json           # Project dependencies
-\`\`\`
+
+```
 
 ## Contributing
 
