@@ -1,7 +1,4 @@
 # ChatWithAI - A Modern Gemini AI Chat Interface
-
-![ChatWithAI Interface](./src/assets/artificial-intelligence.png)
-
 ChatWithAI is a modern, responsive web application that provides an intuitive interface for interacting with Google's Gemini AI. Built with React and Vite, it offers a clean, user-friendly experience with features like chat history, dark mode, and code syntax highlighting.
 
 ## Features
